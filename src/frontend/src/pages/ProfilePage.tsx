@@ -21,6 +21,7 @@ import { ErrorState } from "../components/LoadingState";
 import { DigitalIdCard } from "../components/DigitalIdCard";
 import ManagementPanel from "../components/ManagementPanel";
 import AnnouncementsPanel from "../components/AnnouncementsPanel";
+import ManageLeavePanel from "../components/ManageLeavePanel";
 import {
   useLeaveBalance,
   useOwnPointsAndRank,
@@ -629,6 +630,13 @@ export default function ProfilePage({ profile }: ProfilePageProps) {
       {isManagement && (
         <div className="animate-fade-in">
           <ManagementPanel />
+        </div>
+      )}
+
+      {/* Manage Employee Leaves (management only) */}
+      {isManagement && (
+        <div className="animate-fade-in">
+          <ManageLeavePanel />
         </div>
       )}
 

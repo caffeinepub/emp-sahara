@@ -670,6 +670,23 @@ export function useDeleteFile() {
   });
 }
 
+// ---- Leave by Principal (management) --------------------------------------
+
+export function useGetLeaveBalanceForPrincipal(principalStr?: string) {
+  const { actor, isFetching } = useActor();
+  return useQuery<LeaveBalance>({
+    queryKey: ["leaveBalanceForPrincipal", principalStr],
+    queryFn: async () => {
+      if (!actor || !principalStr) {
+        return { sick: BigInt(0), casual: BigInt(0), earned: BigInt(0), emergency: BigInt(0) };
+      }
+      const { Principal: IcpPrincipal } = await import("@icp-sdk/core/principal");
+      return actor.getLeaveBalanceForPrincipal(IcpPrincipal.fromText(principalStr));
+    },
+    enabled: !!actor && !isFetching && !!principalStr,
+  });
+}
+
 // ---- First Run -------------------------------------------------------------
 
 export function useIsFirstRun() {

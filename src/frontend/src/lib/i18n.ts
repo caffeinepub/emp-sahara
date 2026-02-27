@@ -209,6 +209,15 @@ export const t = {
   checkinTime:          { en: "Check-in", hi: "चेक-इन" },
   checkoutTime:         { en: "Check-out", hi: "चेक-आउट" },
 
+  // Manage Leave Panel
+  manageLeaves:         { en: "Manage Leaves", hi: "छुट्टी प्रबंधन" },
+  editLeaves:           { en: "Edit Leaves", hi: "छुट्टी संपादित करें" },
+  searchEmployees:      { en: "Search employees", hi: "कर्मचारी खोजें" },
+  leaveNote:            { en: "Reason / Note (optional)", hi: "कारण / टिप्पणी (वैकल्पिक)" },
+  leaveUpdated:         { en: "Leave balance updated!", hi: "छुट्टी शेष अपडेट हो गया!" },
+  noEmployees:          { en: "No employees found", hi: "कोई कर्मचारी नहीं मिला" },
+  currentBalance:       { en: "Current Balance", hi: "वर्तमान शेष" },
+
   // Important Files
   importantFiles:       { en: "Files", hi: "फाइलें" },
   filesSection:         { en: "Important Files", hi: "महत्वपूर्ण फाइलें" },
