@@ -1,10 +1,10 @@
 import React from "react";
-import { Home, Clock, CheckSquare, Trophy, User } from "lucide-react";
+import { Home, Clock, CheckSquare, Trophy, User, FolderOpen } from "lucide-react";
 import { useLang } from "../contexts/LanguageContext";
 import { cn } from "@/lib/utils";
 import type { TKey } from "../lib/i18n";
 
-export type TabId = "home" | "attendance" | "tasks" | "rewards" | "profile";
+export type TabId = "home" | "attendance" | "tasks" | "rewards" | "files" | "profile";
 
 interface Tab {
   id: TabId;
@@ -13,11 +13,12 @@ interface Tab {
 }
 
 const TABS: Tab[] = [
-  { id: "home",       tKey: "home",       icon: Home },
-  { id: "attendance", tKey: "attendance", icon: Clock },
-  { id: "tasks",      tKey: "tasks",      icon: CheckSquare },
-  { id: "rewards",    tKey: "rewards",    icon: Trophy },
-  { id: "profile",    tKey: "profile",    icon: User },
+  { id: "home",       tKey: "home",           icon: Home },
+  { id: "attendance", tKey: "attendance",     icon: Clock },
+  { id: "tasks",      tKey: "tasks",          icon: CheckSquare },
+  { id: "rewards",    tKey: "rewards",        icon: Trophy },
+  { id: "files",      tKey: "importantFiles", icon: FolderOpen },
+  { id: "profile",    tKey: "profile",        icon: User },
 ];
 
 interface BottomNavProps {

@@ -20,6 +20,7 @@ import { useLang } from "../contexts/LanguageContext";
 import { ErrorState } from "../components/LoadingState";
 import { DigitalIdCard } from "../components/DigitalIdCard";
 import ManagementPanel from "../components/ManagementPanel";
+import AnnouncementsPanel from "../components/AnnouncementsPanel";
 import {
   useLeaveBalance,
   useOwnPointsAndRank,
@@ -628,6 +629,13 @@ export default function ProfilePage({ profile }: ProfilePageProps) {
       {isManagement && (
         <div className="animate-fade-in">
           <ManagementPanel />
+        </div>
+      )}
+
+      {/* Announcements Panel (management only) */}
+      {isManagement && (
+        <div className="animate-fade-in">
+          <AnnouncementsPanel />
         </div>
       )}
 

@@ -10,6 +10,8 @@ import {
   type Branch,
   type DigitalIdCard,
   type RegistrationRequest,
+  type FileCategory,
+  type FileRecord,
   TaskStatus,
   TaskPriority,
   Role,
@@ -547,6 +549,127 @@ export function useRejectRegistrationRequest() {
   });
 }
 
+// ---- Files -----------------------------------------------------------------
+
+export function useGetFileCategories() {
+  const { actor, isFetching } = useActor();
+  return useQuery<FileCategory[]>({
+    queryKey: ["fileCategories"],
+    queryFn: async () => {
+      if (!actor) return [];
+      return actor.getFileCategories();
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+export function useCreateFileCategory() {
+  const { actor } = useActor();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ name, allowedRoles }: { name: string; allowedRoles: Array<Role> }) => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.createFileCategory(name, allowedRoles);
+    },
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["fileCategories"] });
+    },
+  });
+}
+
+export function useUpdateFileCategory() {
+  const { actor } = useActor();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, name, allowedRoles }: { id: bigint; name: string; allowedRoles: Array<Role> }) => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.updateFileCategory(id, name, allowedRoles);
+    },
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["fileCategories"] });
+    },
+  });
+}
+
+export function useDeleteFileCategory() {
+  const { actor } = useActor();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: bigint) => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.deleteFileCategory(id);
+    },
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["fileCategories"] });
+      void qc.invalidateQueries({ queryKey: ["filesForCategory"] });
+    },
+  });
+}
+
+export function useGetFilesForCategory(categoryId: bigint | null) {
+  const { actor, isFetching } = useActor();
+  return useQuery<FileRecord[]>({
+    queryKey: ["filesForCategory", categoryId?.toString()],
+    queryFn: async () => {
+      if (!actor || categoryId === null) return [];
+      return actor.getFilesForCategory(categoryId);
+    },
+    enabled: !!actor && !isFetching && categoryId !== null,
+  });
+}
+
+export function useGetAllFiles() {
+  const { actor, isFetching } = useActor();
+  return useQuery<FileRecord[]>({
+    queryKey: ["allFileRecords"],
+    queryFn: async () => {
+      if (!actor) return [];
+      return actor.getAllFiles();
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+export function useUploadFile() {
+  const { actor } = useActor();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      categoryId,
+      fileName,
+      fileType,
+      fileData,
+    }: {
+      categoryId: bigint;
+      fileName: string;
+      fileType: string;
+      fileData: Uint8Array;
+    }) => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.uploadFile(categoryId, fileName, fileType, fileData);
+    },
+    onSuccess: (_data, vars) => {
+      void qc.invalidateQueries({ queryKey: ["filesForCategory", vars.categoryId.toString()] });
+      void qc.invalidateQueries({ queryKey: ["allFileRecords"] });
+    },
+  });
+}
+
+export function useDeleteFile() {
+  const { actor } = useActor();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (fileId: bigint) => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.deleteFile(fileId);
+    },
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["filesForCategory"] });
+      void qc.invalidateQueries({ queryKey: ["allFileRecords"] });
+    },
+  });
+}
+
 // Re-export types for convenience
-export type { UserProfile, Task, AttendanceRecord, Announcement, LeaveBalance, LeaderboardEntry, Branch, DigitalIdCard, RegistrationRequest };
+export type { UserProfile, Task, AttendanceRecord, Announcement, LeaveBalance, LeaderboardEntry, Branch, DigitalIdCard, RegistrationRequest, FileCategory, FileRecord };
 export { TaskStatus, TaskPriority, Role, Variant_pending_approved_rejected };

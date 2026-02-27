@@ -37,6 +37,21 @@ export interface DigitalIdCard {
   'employeeId' : Principal,
   'validUntil' : Time,
 }
+export interface FileCategory {
+  'id' : bigint,
+  'name' : string,
+  'createdBy' : Principal,
+  'allowedRoles' : Array<Role>,
+}
+export interface FileRecord {
+  'id' : bigint,
+  'categoryId' : bigint,
+  'fileData' : Uint8Array,
+  'fileName' : string,
+  'fileType' : string,
+  'uploadedAt' : Time,
+  'uploadedBy' : Principal,
+}
 export interface LeaderboardEntry {
   'principal' : Principal,
   'branch' : string,
@@ -121,6 +136,7 @@ export interface _SERVICE {
     [string, string, string, string, string],
     bigint
   >,
+  'createFileCategory' : ActorMethod<[string, Array<Role>], bigint>,
   'createTask' : ActorMethod<
     [string, string, string, string, Principal, Time, TaskPriority, string],
     bigint
@@ -128,14 +144,19 @@ export interface _SERVICE {
   'createUserProfile' : ActorMethod<[UserProfile], undefined>,
   'deactivateUser' : ActorMethod<[Principal], undefined>,
   'deleteBranch' : ActorMethod<[bigint], undefined>,
+  'deleteFile' : ActorMethod<[bigint], undefined>,
+  'deleteFileCategory' : ActorMethod<[bigint], undefined>,
   'getAllAnnouncements' : ActorMethod<[], Array<Announcement>>,
   'getAllDigitalIds' : ActorMethod<[], Array<DigitalIdCard>>,
+  'getAllFiles' : ActorMethod<[], Array<FileRecord>>,
   'getAssignedTasks' : ActorMethod<[], Array<Task>>,
   'getAttendanceHistory' : ActorMethod<[Principal], Array<AttendanceRecord>>,
   'getBranchAttendance' : ActorMethod<[string], Array<AttendanceRecord>>,
   'getBranches' : ActorMethod<[], Array<Branch>>,
   'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
   'getCallerUserRole' : ActorMethod<[], UserRole>,
+  'getFileCategories' : ActorMethod<[], Array<FileCategory>>,
+  'getFilesForCategory' : ActorMethod<[bigint], Array<FileRecord>>,
   'getLeaderboard' : ActorMethod<[], Array<LeaderboardEntry>>,
   'getLeaveBalance' : ActorMethod<[], LeaveBalance>,
   /**
@@ -176,6 +197,7 @@ export interface _SERVICE {
     undefined
   >,
   'updateBranch' : ActorMethod<[bigint, string], undefined>,
+  'updateFileCategory' : ActorMethod<[bigint, string, Array<Role>], undefined>,
   'updateLeaveBalance' : ActorMethod<
     [Principal, bigint, bigint, bigint, bigint],
     undefined
@@ -186,6 +208,7 @@ export interface _SERVICE {
     undefined
   >,
   'updateUserProfile' : ActorMethod<[Principal, UserProfile], undefined>,
+  'uploadFile' : ActorMethod<[bigint, string, string, Uint8Array], bigint>,
 }
 export declare const idlService: IDL.ServiceClass;
 export declare const idlInitArgs: IDL.Type[];

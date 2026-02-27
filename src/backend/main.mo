@@ -4,18 +4,19 @@ import Time "mo:core/Time";
 import Nat "mo:core/Nat";
 import Int "mo:core/Int";
 import List "mo:core/List";
+import Blob "mo:core/Blob";
 import Text "mo:core/Text";
 import Order "mo:core/Order";
 import Array "mo:core/Array";
 import Iter "mo:core/Iter";
-import Migration "migration";
+
 import Runtime "mo:core/Runtime";
 import Principal "mo:core/Principal";
 import MixinAuthorization "authorization/MixinAuthorization";
 import AccessControl "authorization/access-control";
 
 // with migration for data migration and upgrade safety
-(with migration = Migration.run)
+
 actor {
   ////////////////////////////////
   // TYPES
@@ -153,6 +154,27 @@ actor {
   };
 
   ////////////////////////////////
+  // FILES STUFF
+  ////////////////////////////////
+
+  public type FileCategory = {
+    id : Nat;
+    name : Text;
+    allowedRoles : [Role]; // Which roles can view/access files in this category
+    createdBy : Principal; // The admin who created the category
+  };
+
+  public type FileRecord = {
+    id : Nat;
+    categoryId : Nat;
+    fileName : Text;
+    fileType : Text; // Mime type of the file
+    fileData : Blob;
+    uploadedBy : Principal;
+    uploadedAt : Time.Time;
+  };
+
+  ////////////////////////////////
   // AUTHORIZATION
   ////////////////////////////////
 
@@ -178,6 +200,12 @@ actor {
   let digitalIdCards = Map.empty<Principal, DigitalIdCard>();
   let digitalIdStatuses = Map.empty<Principal, DigitalIdStatus>();
   let registrationRequests = Map.empty<Principal, RegistrationRequest>();
+
+  var nextFileCategoryId = 1;
+  var nextFileId = 1;
+
+  let fileCategories = Map.empty<Nat, FileCategory>();
+  let files = Map.empty<Nat, FileRecord>();
 
   ////////////////////////////////
   // HELPERS
@@ -254,6 +282,196 @@ actor {
         case (order) { order };
       };
     };
+  };
+
+  ////////////////////////////////
+  // FILE MANAGEMENT
+  ////////////////////////////////
+
+  // Check if a principal has access to a file category
+  func hasAccessToCategory(caller : Principal, categoryId : Nat) : Bool {
+    switch (fileCategories.get(categoryId)) {
+      case (null) { false };
+      case (?category) {
+        switch (userProfiles.get(caller)) {
+          case (null) { false };
+          case (?profile) {
+            let userRole = profile.role;
+            category.allowedRoles.any(
+              func(role) { role == userRole }
+            );
+          };
+        };
+      };
+    };
+  };
+
+  // Create a new file category
+  public shared ({ caller }) func createFileCategory(name : Text, allowedRoles : [Role]) : async Nat {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only management can create file categories");
+    };
+    if (not isManagement(caller)) {
+      Runtime.trap("Unauthorized: Only management can create file categories");
+    };
+
+    let category : FileCategory = {
+      id = nextFileCategoryId;
+      name;
+      allowedRoles;
+      createdBy = caller;
+    };
+    fileCategories.add(nextFileCategoryId, category);
+    nextFileCategoryId += 1;
+    category.id;
+  };
+
+  // Update an existing file category
+  public shared ({ caller }) func updateFileCategory(id : Nat, name : Text, allowedRoles : [Role]) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only management can update file categories");
+    };
+    if (not isManagement(caller)) {
+      Runtime.trap("Unauthorized: Only management can update file categories");
+    };
+
+    switch (fileCategories.get(id)) {
+      case (null) { Runtime.trap("File category not found") };
+      case (?category) {
+        let updatedCategory : FileCategory = {
+          id;
+          name;
+          allowedRoles;
+          createdBy = category.createdBy;
+        };
+        fileCategories.add(id, updatedCategory);
+      };
+    };
+  };
+
+  // Delete a file category (and associated files)
+  public shared ({ caller }) func deleteFileCategory(id : Nat) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only management can delete file categories");
+    };
+    if (not isManagement(caller)) {
+      Runtime.trap("Unauthorized: Only management can delete file categories");
+    };
+
+    switch (fileCategories.get(id)) {
+      case (null) { Runtime.trap("File category not found") };
+      case (?_) {
+        fileCategories.remove(id);
+        // Delete files in the category
+        let filesToDelete = files.filter(
+          func((_, file)) { file.categoryId == id }
+        );
+        for ((fileId, _) in filesToDelete.entries()) {
+          files.remove(fileId);
+        };
+      };
+    };
+  };
+
+  // Get all file categories (filtered by user role access)
+  public query ({ caller }) func getFileCategories() : async [FileCategory] {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only authenticated users can view file categories");
+    };
+    let categories = fileCategories.values().toArray();
+    switch (userProfiles.get(caller)) {
+      case (null) { [] };
+      case (?profile) {
+        categories.filter(
+          func(category) {
+            category.allowedRoles.any(
+              func(role) { role == profile.role }
+            );
+          }
+        );
+      };
+    };
+  };
+
+  // Upload a file to a category
+  public shared ({ caller }) func uploadFile(
+    categoryId : Nat,
+    fileName : Text,
+    fileType : Text,
+    fileData : Blob,
+  ) : async Nat {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only supervisors or management can upload files");
+    };
+    if (not isSupervisorOrManagement(caller)) {
+      Runtime.trap("Unauthorized: Only supervisors or management can upload files");
+    };
+
+    switch (fileCategories.get(categoryId)) {
+      case (null) { Runtime.trap("File category does not exist") };
+      case (?_) {};
+    };
+
+    let file : FileRecord = {
+      id = nextFileId;
+      categoryId;
+      fileName;
+      fileType;
+      fileData;
+      uploadedBy = caller;
+      uploadedAt = Time.now();
+    };
+    files.add(nextFileId, file);
+    nextFileId += 1;
+    file.id;
+  };
+
+  // Delete a file
+  public shared ({ caller }) func deleteFile(fileId : Nat) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only supervisors or management can delete files");
+    };
+
+    switch (files.get(fileId)) {
+      case (null) { Runtime.trap("File not found") };
+      case (?file) {
+        if (isManagement(caller)) {
+          files.remove(fileId);
+        } else if (isSupervisorOrManagement(caller)) {
+          if (file.uploadedBy != caller) {
+            Runtime.trap("Unauthorized: Can only delete your own uploaded files");
+          };
+          files.remove(fileId);
+        } else {
+          Runtime.trap("Unauthorized: Cannot delete files");
+        };
+      };
+    };
+  };
+
+  // Get files for a specific category (filtered by user role access)
+  public query ({ caller }) func getFilesForCategory(categoryId : Nat) : async [FileRecord] {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only authenticated users can view files");
+    };
+    if (not hasAccessToCategory(caller, categoryId)) {
+      Runtime.trap("Unauthorized: You do not have access to this file category");
+    };
+
+    files.values().toArray().filter(
+      func(file) { file.categoryId == categoryId }
+    );
+  };
+
+  // Get all files (management only)
+  public query ({ caller }) func getAllFiles() : async [FileRecord] {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only management can view all files");
+    };
+    if (not isManagement(caller)) {
+      Runtime.trap("Unauthorized: Only management can view all files");
+    };
+    files.values().toArray();
   };
 
   public query ({ caller }) func getCallerUserProfile() : async ?UserProfile {

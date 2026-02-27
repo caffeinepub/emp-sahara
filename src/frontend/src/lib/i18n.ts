@@ -188,6 +188,18 @@ export const t = {
   enterReason:          { en: "Enter rejection reason", hi: "अस्वीकृति का कारण लिखें" },
   rejectWithReason:     { en: "Reject with reason", hi: "कारण सहित अस्वीकृत करें" },
 
+  // Announcements Panel (management)
+  sendAnnouncement:     { en: "Send Announcement", hi: "घोषणा भेजें" },
+  announcementsPanel:   { en: "Announcements", hi: "घोषणाएं" },
+  allBranchesOption:    { en: "All Branches", hi: "सभी शाखाएं" },
+  announcementSent:     { en: "Announcement sent!", hi: "घोषणा भेजी गई!" },
+  noAnnouncementsYet:   { en: "No announcements yet", hi: "अभी कोई घोषणा नहीं" },
+  titleEn_ann:          { en: "Title (English)", hi: "शीर्षक (अंग्रेज़ी)" },
+  titleHi_ann:          { en: "Title (Hindi)", hi: "शीर्षक (हिंदी)" },
+  bodyEn_ann:           { en: "Message (English)", hi: "संदेश (अंग्रेज़ी)" },
+  bodyHi_ann:           { en: "Message (Hindi)", hi: "संदेश (हिंदी)" },
+  targetBranchLabel:    { en: "Target", hi: "लक्षित शाखा" },
+
   // All Employees Attendance
   allEmployees:         { en: "All Employees", hi: "सभी कर्मचारी" },
   myAttendance:         { en: "My Attendance", hi: "मेरी उपस्थिति" },
@@ -196,6 +208,30 @@ export const t = {
   noDataYet:            { en: "No attendance data", hi: "कोई उपस्थिति डेटा नहीं" },
   checkinTime:          { en: "Check-in", hi: "चेक-इन" },
   checkoutTime:         { en: "Check-out", hi: "चेक-आउट" },
+
+  // Important Files
+  importantFiles:       { en: "Files", hi: "फाइलें" },
+  filesSection:         { en: "Important Files", hi: "महत्वपूर्ण फाइलें" },
+  manageCategories:     { en: "Manage Categories", hi: "श्रेणियां प्रबंधित करें" },
+  addCategory:          { en: "Add Category", hi: "श्रेणी जोड़ें" },
+  categoryName:         { en: "Category Name", hi: "श्रेणी का नाम" },
+  allowedRoles:         { en: "Who Can View", hi: "कौन देख सकता है" },
+  noCategories:         { en: "No categories yet", hi: "अभी कोई श्रेणी नहीं" },
+  uploadFile:           { en: "Upload File", hi: "फाइल अपलोड करें" },
+  uploading:            { en: "Uploading…", hi: "अपलोड हो रहा है…" },
+  downloadFile:         { en: "Download", hi: "डाउनलोड" },
+  deleteFile:           { en: "Delete", hi: "हटाएं" },
+  noFiles:              { en: "No files in this category", hi: "इस श्रेणी में कोई फाइल नहीं" },
+  categoryCreated:      { en: "Category created!", hi: "श्रेणी बना दी गई!" },
+  fileUploaded:         { en: "File uploaded!", hi: "फाइल अपलोड हो गई!" },
+  fileDeleted:          { en: "File deleted", hi: "फाइल हटा दी गई" },
+  categoryDeleted:      { en: "Category deleted", hi: "श्रेणी हटा दी गई" },
+  editCategory:         { en: "Edit Category", hi: "श्रेणी संपादित करें" },
+  restricted:           { en: "Restricted", hi: "प्रतिबंधित" },
+  accessible:           { en: "Accessible", hi: "उपलब्ध" },
+  selectCategory:       { en: "Select Category", hi: "श्रेणी चुनें" },
+  chooseFile:           { en: "Choose file…", hi: "फाइल चुनें…" },
+  uploadTo:             { en: "Upload to", hi: "अपलोड करें" },
 };
 
 export type TKey = keyof typeof t;

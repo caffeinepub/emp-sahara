@@ -16,6 +16,12 @@ export interface LeaderboardEntry {
     points: bigint;
 }
 export type Time = bigint;
+export interface FileCategory {
+    id: bigint;
+    name: string;
+    createdBy: Principal;
+    allowedRoles: Array<Role>;
+}
 export interface Task {
     id: bigint;
     status: TaskStatus;
@@ -35,14 +41,14 @@ export interface Branch {
     id: bigint;
     name: string;
 }
-export interface Announcement {
+export interface FileRecord {
     id: bigint;
-    title: string;
-    titleHindi: string;
-    body: string;
-    createdAt: Time;
-    targetBranch: string;
-    bodyHindi: string;
+    categoryId: bigint;
+    fileData: Uint8Array;
+    fileName: string;
+    fileType: string;
+    uploadedAt: Time;
+    uploadedBy: Principal;
 }
 export interface RegistrationRequest {
     status: Variant_pending_approved_rejected;
@@ -61,6 +67,15 @@ export interface AttendanceRecord {
     checkIn?: Time;
     date: string;
     checkOut?: Time;
+}
+export interface Announcement {
+    id: bigint;
+    title: string;
+    titleHindi: string;
+    body: string;
+    createdAt: Time;
+    targetBranch: string;
+    bodyHindi: string;
 }
 export interface LeaveBalance {
     emergency: bigint;
@@ -127,18 +142,24 @@ export interface backendInterface {
     checkIn(): Promise<void>;
     checkOut(): Promise<void>;
     createAnnouncement(title: string, titleHindi: string, body: string, bodyHindi: string, targetBranch: string): Promise<bigint>;
+    createFileCategory(name: string, allowedRoles: Array<Role>): Promise<bigint>;
     createTask(title: string, titleHindi: string, description: string, descriptionHindi: string, assignedTo: Principal, dueDate: Time, priority: TaskPriority, branch: string): Promise<bigint>;
     createUserProfile(profile: UserProfile): Promise<void>;
     deactivateUser(userId: Principal): Promise<void>;
     deleteBranch(id: bigint): Promise<void>;
+    deleteFile(fileId: bigint): Promise<void>;
+    deleteFileCategory(id: bigint): Promise<void>;
     getAllAnnouncements(): Promise<Array<Announcement>>;
     getAllDigitalIds(): Promise<Array<DigitalIdCard>>;
+    getAllFiles(): Promise<Array<FileRecord>>;
     getAssignedTasks(): Promise<Array<Task>>;
     getAttendanceHistory(userId: Principal): Promise<Array<AttendanceRecord>>;
     getBranchAttendance(branch: string): Promise<Array<AttendanceRecord>>;
     getBranches(): Promise<Array<Branch>>;
     getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
+    getFileCategories(): Promise<Array<FileCategory>>;
+    getFilesForCategory(categoryId: bigint): Promise<Array<FileRecord>>;
     getLeaderboard(): Promise<Array<LeaderboardEntry>>;
     getLeaveBalance(): Promise<LeaveBalance>;
     /**
@@ -173,8 +194,10 @@ export interface backendInterface {
     submitDigitalIdRequest(): Promise<void>;
     submitRegistrationRequest(name: string, nameHindi: string, role: Role, department: string, branch: string, phone: string, employeeId: string): Promise<void>;
     updateBranch(id: bigint, name: string): Promise<void>;
+    updateFileCategory(id: bigint, name: string, allowedRoles: Array<Role>): Promise<void>;
     updateLeaveBalance(employeeId: Principal, sick: bigint, casual: bigint, earned: bigint, emergency: bigint): Promise<void>;
     updatePoints(userId: Principal, points: bigint): Promise<void>;
     updateTaskStatus(taskId: bigint, status: TaskStatus, completionNote: string | null): Promise<void>;
     updateUserProfile(userId: Principal, profile: UserProfile): Promise<void>;
+    uploadFile(categoryId: bigint, fileName: string, fileType: string, fileData: Uint8Array): Promise<bigint>;
 }

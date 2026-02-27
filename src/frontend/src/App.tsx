@@ -10,6 +10,7 @@ import AttendancePage from "./pages/AttendancePage";
 import TasksPage from "./pages/TasksPage";
 import RewardsPage from "./pages/RewardsPage";
 import ProfilePage from "./pages/ProfilePage";
+import FilesPage from "./pages/FilesPage";
 import AppHeader from "./components/AppHeader";
 import BottomNav, { type TabId } from "./components/BottomNav";
 import { PageLoader } from "./components/LoadingState";
@@ -76,6 +77,9 @@ function AppInner() {
         )}
         {activeTab === "rewards" && (
           <RewardsPage profile={userProfile} />
+        )}
+        {activeTab === "files" && (
+          <FilesPage profile={userProfile} principal={principal} />
         )}
         {activeTab === "profile" && (
           <ProfilePage profile={userProfile} />

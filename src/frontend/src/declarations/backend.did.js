@@ -51,6 +51,15 @@ export const DigitalIdCard = IDL.Record({
   'employeeId' : IDL.Principal,
   'validUntil' : Time,
 });
+export const FileRecord = IDL.Record({
+  'id' : IDL.Nat,
+  'categoryId' : IDL.Nat,
+  'fileData' : IDL.Vec(IDL.Nat8),
+  'fileName' : IDL.Text,
+  'fileType' : IDL.Text,
+  'uploadedAt' : Time,
+  'uploadedBy' : IDL.Principal,
+});
 export const TaskStatus = IDL.Variant({
   'pending' : IDL.Null,
   'blocked' : IDL.Null,
@@ -85,6 +94,12 @@ export const AttendanceRecord = IDL.Record({
   'checkOut' : IDL.Opt(Time),
 });
 export const Branch = IDL.Record({ 'id' : IDL.Nat, 'name' : IDL.Text });
+export const FileCategory = IDL.Record({
+  'id' : IDL.Nat,
+  'name' : IDL.Text,
+  'createdBy' : IDL.Principal,
+  'allowedRoles' : IDL.Vec(Role),
+});
 export const LeaderboardEntry = IDL.Record({
   'principal' : IDL.Principal,
   'branch' : IDL.Text,
@@ -138,6 +153,7 @@ export const idlService = IDL.Service({
       [IDL.Nat],
       [],
     ),
+  'createFileCategory' : IDL.Func([IDL.Text, IDL.Vec(Role)], [IDL.Nat], []),
   'createTask' : IDL.Func(
       [
         IDL.Text,
@@ -155,8 +171,11 @@ export const idlService = IDL.Service({
   'createUserProfile' : IDL.Func([UserProfile], [], []),
   'deactivateUser' : IDL.Func([IDL.Principal], [], []),
   'deleteBranch' : IDL.Func([IDL.Nat], [], []),
+  'deleteFile' : IDL.Func([IDL.Nat], [], []),
+  'deleteFileCategory' : IDL.Func([IDL.Nat], [], []),
   'getAllAnnouncements' : IDL.Func([], [IDL.Vec(Announcement)], ['query']),
   'getAllDigitalIds' : IDL.Func([], [IDL.Vec(DigitalIdCard)], ['query']),
+  'getAllFiles' : IDL.Func([], [IDL.Vec(FileRecord)], ['query']),
   'getAssignedTasks' : IDL.Func([], [IDL.Vec(Task)], ['query']),
   'getAttendanceHistory' : IDL.Func(
       [IDL.Principal],
@@ -171,6 +190,8 @@ export const idlService = IDL.Service({
   'getBranches' : IDL.Func([], [IDL.Vec(Branch)], ['query']),
   'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
   'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
+  'getFileCategories' : IDL.Func([], [IDL.Vec(FileCategory)], ['query']),
+  'getFilesForCategory' : IDL.Func([IDL.Nat], [IDL.Vec(FileRecord)], ['query']),
   'getLeaderboard' : IDL.Func([], [IDL.Vec(LeaderboardEntry)], ['query']),
   'getLeaveBalance' : IDL.Func([], [LeaveBalance], ['query']),
   'getLeaveBalanceForPrincipal' : IDL.Func(
@@ -218,6 +239,7 @@ export const idlService = IDL.Service({
       [],
     ),
   'updateBranch' : IDL.Func([IDL.Nat, IDL.Text], [], []),
+  'updateFileCategory' : IDL.Func([IDL.Nat, IDL.Text, IDL.Vec(Role)], [], []),
   'updateLeaveBalance' : IDL.Func(
       [IDL.Principal, IDL.Nat, IDL.Nat, IDL.Nat, IDL.Nat],
       [],
@@ -230,6 +252,11 @@ export const idlService = IDL.Service({
       [],
     ),
   'updateUserProfile' : IDL.Func([IDL.Principal, UserProfile], [], []),
+  'uploadFile' : IDL.Func(
+      [IDL.Nat, IDL.Text, IDL.Text, IDL.Vec(IDL.Nat8)],
+      [IDL.Nat],
+      [],
+    ),
 });
 
 export const idlInitArgs = [];
@@ -278,6 +305,15 @@ export const idlFactory = ({ IDL }) => {
     'employeeId' : IDL.Principal,
     'validUntil' : Time,
   });
+  const FileRecord = IDL.Record({
+    'id' : IDL.Nat,
+    'categoryId' : IDL.Nat,
+    'fileData' : IDL.Vec(IDL.Nat8),
+    'fileName' : IDL.Text,
+    'fileType' : IDL.Text,
+    'uploadedAt' : Time,
+    'uploadedBy' : IDL.Principal,
+  });
   const TaskStatus = IDL.Variant({
     'pending' : IDL.Null,
     'blocked' : IDL.Null,
@@ -312,6 +348,12 @@ export const idlFactory = ({ IDL }) => {
     'checkOut' : IDL.Opt(Time),
   });
   const Branch = IDL.Record({ 'id' : IDL.Nat, 'name' : IDL.Text });
+  const FileCategory = IDL.Record({
+    'id' : IDL.Nat,
+    'name' : IDL.Text,
+    'createdBy' : IDL.Principal,
+    'allowedRoles' : IDL.Vec(Role),
+  });
   const LeaderboardEntry = IDL.Record({
     'principal' : IDL.Principal,
     'branch' : IDL.Text,
@@ -365,6 +407,7 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Nat],
         [],
       ),
+    'createFileCategory' : IDL.Func([IDL.Text, IDL.Vec(Role)], [IDL.Nat], []),
     'createTask' : IDL.Func(
         [
           IDL.Text,
@@ -382,8 +425,11 @@ export const idlFactory = ({ IDL }) => {
     'createUserProfile' : IDL.Func([UserProfile], [], []),
     'deactivateUser' : IDL.Func([IDL.Principal], [], []),
     'deleteBranch' : IDL.Func([IDL.Nat], [], []),
+    'deleteFile' : IDL.Func([IDL.Nat], [], []),
+    'deleteFileCategory' : IDL.Func([IDL.Nat], [], []),
     'getAllAnnouncements' : IDL.Func([], [IDL.Vec(Announcement)], ['query']),
     'getAllDigitalIds' : IDL.Func([], [IDL.Vec(DigitalIdCard)], ['query']),
+    'getAllFiles' : IDL.Func([], [IDL.Vec(FileRecord)], ['query']),
     'getAssignedTasks' : IDL.Func([], [IDL.Vec(Task)], ['query']),
     'getAttendanceHistory' : IDL.Func(
         [IDL.Principal],
@@ -398,6 +444,12 @@ export const idlFactory = ({ IDL }) => {
     'getBranches' : IDL.Func([], [IDL.Vec(Branch)], ['query']),
     'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
     'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
+    'getFileCategories' : IDL.Func([], [IDL.Vec(FileCategory)], ['query']),
+    'getFilesForCategory' : IDL.Func(
+        [IDL.Nat],
+        [IDL.Vec(FileRecord)],
+        ['query'],
+      ),
     'getLeaderboard' : IDL.Func([], [IDL.Vec(LeaderboardEntry)], ['query']),
     'getLeaveBalance' : IDL.Func([], [LeaveBalance], ['query']),
     'getLeaveBalanceForPrincipal' : IDL.Func(
@@ -445,6 +497,7 @@ export const idlFactory = ({ IDL }) => {
         [],
       ),
     'updateBranch' : IDL.Func([IDL.Nat, IDL.Text], [], []),
+    'updateFileCategory' : IDL.Func([IDL.Nat, IDL.Text, IDL.Vec(Role)], [], []),
     'updateLeaveBalance' : IDL.Func(
         [IDL.Principal, IDL.Nat, IDL.Nat, IDL.Nat, IDL.Nat],
         [],
@@ -457,6 +510,11 @@ export const idlFactory = ({ IDL }) => {
         [],
       ),
     'updateUserProfile' : IDL.Func([IDL.Principal, UserProfile], [], []),
+    'uploadFile' : IDL.Func(
+        [IDL.Nat, IDL.Text, IDL.Text, IDL.Vec(IDL.Nat8)],
+        [IDL.Nat],
+        [],
+      ),
   });
 };
 
