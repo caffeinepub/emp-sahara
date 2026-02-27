@@ -1208,4 +1208,37 @@ actor {
       };
     };
   };
+
+  ////////////////////////////////
+  // FIRST RUN ADMIN SETUP
+  ////////////////////////////////
+
+  /// Checks if this is the first run of the application (no users registered yet).
+  public query ({ caller }) func isFirstRun() : async Bool {
+    userProfiles.size() == 0;
+  };
+
+  /// Claims the first run admin slot.
+  public shared ({ caller }) func claimFirstRunAdmin(name : Text, nameHindi : Text, employeeId : Text, phone : Text, branch : Text) : async UserProfile {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only authenticated users can claim first run admin");
+    };
+    if (userProfiles.size() != 0) {
+      Runtime.trap("First-run setup already completed");
+    };
+    let profile : UserProfile = {
+      id = caller;
+      name;
+      nameHindi;
+      role = #management;
+      department = "Management";
+      branch;
+      employeeId;
+      phone;
+      isActive = true;
+      points = 0;
+    };
+    userProfiles.add(caller, profile);
+    profile;
+  };
 };

@@ -1,35 +1,34 @@
 # EMP Sahara
 
 ## Current State
-The app has: login/registration with management approval, attendance (GPS-gated), task management, reward points, digital ID cards, announcements (management sends to branches), leave management, and branch CRUD. No file/document sharing system exists.
+- Full employee management app with roles: employee, supervisor, management
+- Registration via RegistrationRequestPage (requires management approval)
+- Management role was missing from the signup dropdown (now fixed)
+- No first-run setup: the very first person has no way to claim management role without another manager approving them
 
 ## Requested Changes (Diff)
 
 ### Add
-- **Important Files** section: managers and supervisors can upload files (PDF, JPG, PNG, other docs) organized into custom categories
-- Custom categories: managers can create, name, and delete categories
-- Access control per category: manager sets which roles can view each category (employee / supervisor / management)
-- All users see only files in categories they are allowed to access
-- Files stored as base64 blobs in the backend with metadata (name, type, size, category, uploader, timestamp)
-- File listing with download support
-- Hindi + English labels throughout
+- Backend: `isFirstRun()` query — returns true if no user profiles exist yet
+- Backend: `claimFirstRunAdmin(name, nameHindi, employeeId, phone, branch)` mutation — creates the first user directly as management role; fails if any profiles already exist
+- Frontend: `FirstRunSetupPage` — a friendly setup screen shown only when `isFirstRun` returns true; collects name (English + Hindi), employee ID, phone, branch name; on submit calls `claimFirstRunAdmin` and proceeds into the app
+- Frontend: Wire `isFirstRun` check into `App.tsx` routing so it shows `FirstRunSetupPage` before the normal login/registration flow when applicable
 
 ### Modify
-- Backend: add `FileCategory`, `FileRecord` types; add functions for category management and file management
-- Frontend: add "Important Files" tab/page accessible from main navigation
+- `App.tsx`: add first-run check; if `isFirstRun` is true and user is authenticated but has no profile, show `FirstRunSetupPage` instead of `RegistrationRequestPage`
+- `RegistrationRequestPage.tsx`: management role option already added (done)
 
 ### Remove
-- Nothing removed
+- Nothing
 
 ## Implementation Plan
-1. Generate backend with new `FileCategory` (id, name, allowedRoles, createdBy) and `FileRecord` (id, categoryId, fileName, fileType, fileData blob, uploadedBy, uploadedAt) types
-2. Add backend functions: createCategory, updateCategory, deleteCategory, getCategories, uploadFile, deleteFile, getFilesForCategory
-3. Delegate frontend to build ImportantFilesPage with: category management panel (managers only), file upload (managers + supervisors), file list with download, role-filtered view
+1. Generate updated Motoko backend with `isFirstRun` and `claimFirstRunAdmin` functions
+2. Add `useIsFirstRun` and `useClaimFirstRunAdmin` hooks in `useQueries.ts`
+3. Create `FirstRunSetupPage.tsx` with bilingual form
+4. Update `App.tsx` routing to check first-run state
 
 ## UX Notes
-- Large tap targets for glove-friendly use
-- Color indicators: green = accessible, yellow = restricted
-- Hindi/English toggle consistent with rest of app
-- Categories shown as collapsible sections
-- File cards show: name, type icon, uploader name, upload date, download button
-- Management sees "Manage Categories" button; supervisors see upload only; employees see read-only
+- First-run screen should feel welcoming and explain this is the initial admin setup
+- Show in both Hindi and English
+- After claiming, user goes straight into the app as management
+- Branch field: free-text input since no branches exist yet at first run

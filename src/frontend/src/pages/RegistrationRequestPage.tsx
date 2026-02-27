@@ -318,6 +318,7 @@ export default function RegistrationRequestPage() {
               <SelectContent>
                 <SelectItem value={Role.employee}>{bi("employee").primary} · {bi("employee").secondary}</SelectItem>
                 <SelectItem value={Role.supervisor}>{bi("supervisor").primary} · {bi("supervisor").secondary}</SelectItem>
+                <SelectItem value={Role.management}>{bi("management").primary} · {bi("management").secondary}</SelectItem>
               </SelectContent>
             </Select>
           </div>

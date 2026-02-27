@@ -132,6 +132,13 @@ export interface _SERVICE {
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
   'checkIn' : ActorMethod<[], undefined>,
   'checkOut' : ActorMethod<[], undefined>,
+  /**
+   * / Claims the first run admin slot.
+   */
+  'claimFirstRunAdmin' : ActorMethod<
+    [string, string, string, string, string],
+    UserProfile
+  >,
   'createAnnouncement' : ActorMethod<
     [string, string, string, string, string],
     bigint
@@ -188,6 +195,10 @@ export interface _SERVICE {
   'getPointsRewardForTask' : ActorMethod<[TaskPriority], bigint>,
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
+  /**
+   * / Checks if this is the first run of the application (no users registered yet).
+   */
+  'isFirstRun' : ActorMethod<[], boolean>,
   'markAnnouncementAsRead' : ActorMethod<[bigint], undefined>,
   'rejectRegistrationRequest' : ActorMethod<[Principal, string], undefined>,
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,

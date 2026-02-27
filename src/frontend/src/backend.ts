@@ -224,6 +224,10 @@ export interface backendInterface {
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
     checkIn(): Promise<void>;
     checkOut(): Promise<void>;
+    /**
+     * / Claims the first run admin slot.
+     */
+    claimFirstRunAdmin(name: string, nameHindi: string, employeeId: string, phone: string, branch: string): Promise<UserProfile>;
     createAnnouncement(title: string, titleHindi: string, body: string, bodyHindi: string, targetBranch: string): Promise<bigint>;
     createFileCategory(name: string, allowedRoles: Array<Role>): Promise<bigint>;
     createTask(title: string, titleHindi: string, description: string, descriptionHindi: string, assignedTo: Principal, dueDate: Time, priority: TaskPriority, branch: string): Promise<bigint>;
@@ -271,6 +275,10 @@ export interface backendInterface {
     getPointsRewardForTask(priority: TaskPriority): Promise<bigint>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
     isCallerAdmin(): Promise<boolean>;
+    /**
+     * / Checks if this is the first run of the application (no users registered yet).
+     */
+    isFirstRun(): Promise<boolean>;
     markAnnouncementAsRead(announcementId: bigint): Promise<void>;
     rejectRegistrationRequest(requester: Principal, reason: string): Promise<void>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
@@ -397,6 +405,20 @@ export class Backend implements backendInterface {
         } else {
             const result = await this.actor.checkOut();
             return result;
+        }
+    }
+    async claimFirstRunAdmin(arg0: string, arg1: string, arg2: string, arg3: string, arg4: string): Promise<UserProfile> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.claimFirstRunAdmin(arg0, arg1, arg2, arg3, arg4);
+                return from_candid_UserProfile_n3(this._uploadFile, this._downloadFile, result);
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.claimFirstRunAdmin(arg0, arg1, arg2, arg3, arg4);
+            return from_candid_UserProfile_n3(this._uploadFile, this._downloadFile, result);
         }
     }
     async createAnnouncement(arg0: string, arg1: string, arg2: string, arg3: string, arg4: string): Promise<bigint> {
@@ -847,6 +869,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.isCallerAdmin();
+            return result;
+        }
+    }
+    async isFirstRun(): Promise<boolean> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.isFirstRun();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.isFirstRun();
             return result;
         }
     }

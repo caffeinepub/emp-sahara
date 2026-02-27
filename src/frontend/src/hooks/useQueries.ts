@@ -670,6 +670,36 @@ export function useDeleteFile() {
   });
 }
 
+// ---- First Run -------------------------------------------------------------
+
+export function useIsFirstRun() {
+  const { actor, isFetching: actorFetching } = useActor();
+  return useQuery<boolean>({
+    queryKey: ["isFirstRun"],
+    queryFn: async () => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.isFirstRun();
+    },
+    enabled: !!actor && !actorFetching,
+    staleTime: 30_000,
+  });
+}
+
+export function useClaimFirstRunAdmin() {
+  const { actor } = useActor();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (args: { name: string; nameHindi: string; employeeId: string; phone: string; branch: string }) => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.claimFirstRunAdmin(args.name, args.nameHindi, args.employeeId, args.phone, args.branch);
+    },
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["currentUserProfile"] });
+      void qc.invalidateQueries({ queryKey: ["isFirstRun"] });
+    },
+  });
+}
+
 // Re-export types for convenience
 export type { UserProfile, Task, AttendanceRecord, Announcement, LeaveBalance, LeaderboardEntry, Branch, DigitalIdCard, RegistrationRequest, FileCategory, FileRecord };
 export { TaskStatus, TaskPriority, Role, Variant_pending_approved_rejected };

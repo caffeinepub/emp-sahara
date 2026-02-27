@@ -141,6 +141,10 @@ export interface backendInterface {
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
     checkIn(): Promise<void>;
     checkOut(): Promise<void>;
+    /**
+     * / Claims the first run admin slot.
+     */
+    claimFirstRunAdmin(name: string, nameHindi: string, employeeId: string, phone: string, branch: string): Promise<UserProfile>;
     createAnnouncement(title: string, titleHindi: string, body: string, bodyHindi: string, targetBranch: string): Promise<bigint>;
     createFileCategory(name: string, allowedRoles: Array<Role>): Promise<bigint>;
     createTask(title: string, titleHindi: string, description: string, descriptionHindi: string, assignedTo: Principal, dueDate: Time, priority: TaskPriority, branch: string): Promise<bigint>;
@@ -188,6 +192,10 @@ export interface backendInterface {
     getPointsRewardForTask(priority: TaskPriority): Promise<bigint>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
     isCallerAdmin(): Promise<boolean>;
+    /**
+     * / Checks if this is the first run of the application (no users registered yet).
+     */
+    isFirstRun(): Promise<boolean>;
     markAnnouncementAsRead(announcementId: bigint): Promise<void>;
     rejectRegistrationRequest(requester: Principal, reason: string): Promise<void>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;

@@ -2,9 +2,10 @@ import React, { useState } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import { useInternetIdentity } from "./hooks/useInternetIdentity";
-import { useGetCallerUserProfile, useGetMyRegistrationStatus } from "./hooks/useQueries";
+import { useGetCallerUserProfile, useGetMyRegistrationStatus, useIsFirstRun } from "./hooks/useQueries";
 import LoginPage from "./pages/LoginPage";
 import RegistrationRequestPage from "./pages/RegistrationRequestPage";
+import FirstRunSetupPage from "./pages/FirstRunSetupPage";
 import HomePage from "./pages/HomePage";
 import AttendancePage from "./pages/AttendancePage";
 import TasksPage from "./pages/TasksPage";
@@ -24,6 +25,9 @@ function AppInner() {
     isFetched: profileFetched,
   } = useGetCallerUserProfile();
 
+  // First-run check runs in parallel with profile fetch
+  const { data: firstRunData, isFetched: firstRunFetched } = useIsFirstRun();
+
   // Only check registration status when logged in and no profile
   const hasNoProfile = isAuthenticated && profileFetched && userProfile === null;
   // Pre-fetch registration status (used by RegistrationRequestPage internally)
@@ -32,7 +36,7 @@ function AppInner() {
   const [activeTab, setActiveTab] = useState<TabId>("home");
 
   // Initializing
-  if (isInitializing || (isAuthenticated && !profileFetched)) {
+  if (isInitializing || (isAuthenticated && (!profileFetched || !firstRunFetched))) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <PageLoader />
@@ -43,6 +47,11 @@ function AppInner() {
   // Not logged in
   if (!isAuthenticated) {
     return <LoginPage />;
+  }
+
+  // Logged in but no profile — first run takes priority over regular registration
+  if (hasNoProfile && firstRunData === true) {
+    return <FirstRunSetupPage />;
   }
 
   // Logged in but no profile — show registration flow

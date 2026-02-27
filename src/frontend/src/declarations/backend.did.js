@@ -148,6 +148,11 @@ export const idlService = IDL.Service({
   'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
   'checkIn' : IDL.Func([], [], []),
   'checkOut' : IDL.Func([], [], []),
+  'claimFirstRunAdmin' : IDL.Func(
+      [IDL.Text, IDL.Text, IDL.Text, IDL.Text, IDL.Text],
+      [UserProfile],
+      [],
+    ),
   'createAnnouncement' : IDL.Func(
       [IDL.Text, IDL.Text, IDL.Text, IDL.Text, IDL.Text],
       [IDL.Nat],
@@ -229,6 +234,7 @@ export const idlService = IDL.Service({
       ['query'],
     ),
   'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
+  'isFirstRun' : IDL.Func([], [IDL.Bool], ['query']),
   'markAnnouncementAsRead' : IDL.Func([IDL.Nat], [], []),
   'rejectRegistrationRequest' : IDL.Func([IDL.Principal, IDL.Text], [], []),
   'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
@@ -402,6 +408,11 @@ export const idlFactory = ({ IDL }) => {
     'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
     'checkIn' : IDL.Func([], [], []),
     'checkOut' : IDL.Func([], [], []),
+    'claimFirstRunAdmin' : IDL.Func(
+        [IDL.Text, IDL.Text, IDL.Text, IDL.Text, IDL.Text],
+        [UserProfile],
+        [],
+      ),
     'createAnnouncement' : IDL.Func(
         [IDL.Text, IDL.Text, IDL.Text, IDL.Text, IDL.Text],
         [IDL.Nat],
@@ -487,6 +498,7 @@ export const idlFactory = ({ IDL }) => {
         ['query'],
       ),
     'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
+    'isFirstRun' : IDL.Func([], [IDL.Bool], ['query']),
     'markAnnouncementAsRead' : IDL.Func([IDL.Nat], [], []),
     'rejectRegistrationRequest' : IDL.Func([IDL.Principal, IDL.Text], [], []),
     'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
